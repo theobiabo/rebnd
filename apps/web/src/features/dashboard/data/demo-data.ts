@@ -1,0 +1,92 @@
+import type { DashboardState } from "../types"
+
+export const initialState: DashboardState = {
+  monitoring: true,
+  execution: true,
+  publishing: false,
+  checks: "pnpm typecheck && pnpm test",
+  retention: 30,
+  budget: 20,
+  onboarded: true,
+  revision: 3,
+  approvedRevision: 3,
+  evidenceRevision: 3,
+  inventoryVersion: "1.8.2",
+  evidenceStale: false,
+  freshness: "Fresh",
+  changes: [
+    {
+      id: "CHG-024",
+      title: "Subscription identifier moves to a nested object",
+      description:
+        "The target contract nests the identifier at subscription.id. The current handler reads subscription_id, which leaves the entitlement lookup unresolved.",
+      kind: "Field mapping",
+      version: "fixture-v2",
+      status: "Verified",
+      date: "Today, 09:42",
+      file: "src/webhooks/subscription.ts",
+      line: 20,
+    },
+    {
+      id: "CHG-025",
+      title: "Webhook event envelope adds a schema version",
+      description:
+        "The example event envelope introduces schema_version. Applicability to your approved handler needs review before the target can be exercised.",
+      kind: "Schema change",
+      version: "fixture-v3",
+      status: "Needs review",
+      date: "Today, 10:15",
+      file: "src/webhooks/subscription.ts",
+      line: 18,
+    },
+    {
+      id: "CHG-023",
+      title: "Cancellation ordering is not defined",
+      description:
+        "The target source does not establish ordering semantics. An engineer must define the intended cancellation behavior and provide version-specific evidence.",
+      kind: "Behavior change",
+      version: "fixture-v2",
+      status: "Blocked",
+      date: "Yesterday",
+      file: "src/services/entitlements.ts",
+      line: 34,
+    },
+  ],
+  activity: [
+    {
+      id: "EVT-104",
+      action: "Change requires review",
+      detail: "CHG-025 · target fixture-v3 is outside approval revision 3",
+      time: "10:15",
+      actor: "rebnd",
+    },
+    {
+      id: "EVT-103",
+      action: "Comparative evidence prepared",
+      detail: "CHG-024 · same assertions, passing patched fixture",
+      time: "09:42",
+      actor: "rebnd",
+    },
+    {
+      id: "EVT-102",
+      action: "Target failure reproduced",
+      detail: "CHG-024 · INV-001 failed with the unpatched handler",
+      time: "09:39",
+      actor: "rebnd",
+    },
+    {
+      id: "EVT-101",
+      action: "Monitoring sources checked",
+      detail: "3 example sources · no source fetch failures",
+      time: "09:30",
+      actor: "rebnd",
+    },
+    {
+      id: "EVT-100",
+      action: "Workflow assertions approved",
+      detail: "Revision 3 · 3 assertions · field mappings only",
+      time: "08:54",
+      actor: "You",
+    },
+  ],
+}

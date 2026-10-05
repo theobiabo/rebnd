@@ -1,0 +1,39 @@
+{
+  "name": "@workspace/shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "lint": "eslint",
+    "format": "prettier --write \"src/**/*.{ts,tsx}\"",
+    "typecheck": "tsc --noEmit"
+  },
+  "exports": {
+    "./components/brand": "./src/components/brand.tsx",
+    "./components/page-heading": "./src/components/page-heading.tsx",
+    "./components/status-badge": "./src/components/status-badge.tsx",
+    "./providers/theme-provider": "./src/providers/theme-provider.tsx",
+    "./types/integration": "./src/types/integration.ts",
+    "./examples/subscription": "./src/examples/subscription.ts",
+    "./utils/download-json": "./src/utils/download-json.ts",
+    "./components/password-field": "./src/components/password-field.tsx"
+  },
+  "dependencies": {
+    "@workspace/ui": "workspace:*",
+    "lucide-react": "^1.52.0"
+  },
+  "peerDependencies": {
+    "react": "^19.2.8"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10",
+    "@types/react": "^19",
+    "eslint": "^10",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "eslint-plugin-react-refresh": "^0.5.7",
+    "globals": "^17",
+    "react": "^19.2.8",
+    "typescript": "~6.0.2",
+    "typescript-eslint": "^8"
+  }
+}
