@@ -33,7 +33,7 @@ export function ChangeDetailPage({
           title="Change not found."
           description="This change is not part of the current demo workspace."
         />
-        <a href="/dashboard/changes" className="underline">
+        <a href="/demo/changes" className="underline">
           Back to changes
         </a>
       </>
@@ -41,7 +41,7 @@ export function ChangeDetailPage({
   return (
     <>
       <a
-        href="/dashboard/changes"
+        href="/demo/changes"
         className="mb-5 inline-flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground"
       >
         <ArrowLeft className="size-3" />
@@ -143,7 +143,7 @@ export function ChangeDetailPage({
                 </p>
               </div>
               <a
-                href="/dashboard/evidence"
+                href="/demo/evidence"
                 className="flex items-center justify-between border-t px-5 py-3 text-xs"
               >
                 Inspect all three comparisons
@@ -169,7 +169,7 @@ export function ChangeDetailPage({
                       : "Supply a version-specific target fixture before verifying this change. The target is approved, but no evidence input is available. No patch was generated."}
                   </p>
                   <a
-                    href="/dashboard/integration"
+                    href="/demo/integration"
                     className="inline-block text-xs underline"
                   >
                     Review approved behavior
@@ -323,7 +323,7 @@ export function ChangeDetailPage({
             afterwards. Assertions and existing checks remain unchanged.
           </p>
           <a
-            href="/dashboard/evidence"
+            href="/demo/evidence"
             className="mt-4 inline-flex items-center gap-2 text-xs underline"
           >
             Review evidence package

@@ -1,8 +1,10 @@
 # rebnd
 
-An integration maintenance product interface built with React, TypeScript, Vite, Tailwind CSS, and shared shadcn components.
+An integration maintenance application with a React frontend, Hono/Node.js control plane, PostgreSQL persistence, and GitHub authentication.
 
 ## Development
+
+Configure the database and GitHub OAuth credentials using [the API setup guide](apps/api/README.md) before starting the full application.
 
 ```sh
 bun install
@@ -10,6 +12,7 @@ bun run dev
 bun run build
 bun run lint
 bun run typecheck
+bun run test
 ```
 
 ## Structure
@@ -17,20 +20,29 @@ bun run typecheck
 ```text
 apps/web/src/
   App.tsx                         Route entry point
-  features/auth/                 Sign-in, sign-up, and password reset UI
+  features/auth/                 GitHub sign-in and session protection
+  features/workspace/            API-backed private workspace
+  lib/                           Auth and API clients
   features/marketing/            Homepage and product demonstration
     components/                  Workflow preview and marketing dialogs
-  features/dashboard/
+  features/dashboard/            Public synthetic demo
     components/                  Dashboard shell, change table, and domain-specific UI
     pages/                       Overview, changes, inventory, evidence,
                                  activity, settings, and onboarding
     hooks/                       Local workspace state and actions
     data/                        Explicit synthetic demonstration fixtures
     types.ts                     Local dashboard state types
+apps/api/src/
+  auth/                          Better Auth configuration
+  config/                        Validated environment
+  db/                            PostgreSQL connections and migrations
+  http/                          API routes and middleware
+  modules/                       Installation commands and leased jobs
 packages/shared/src/
   components/                    Brand, page heading, and status badge
   providers/                     Reusable theme provider
-  types/                         Shared integration and activity contracts
+  types/                         Shared demo integration types
+  contracts/                     Shared API validation and response types
   examples/                      Shared synthetic workflow assertions
   utils/                         Browser JSON download helper
 packages/ui/src/
@@ -53,17 +65,17 @@ The shared package exports TypeScript source for the app bundler, matching the e
 
 ## Routes
 
-The homepage lives at `/`. The auth preview lives at `/auth`, with `?mode=signup` and `?mode=reset` variants. These forms validate input but do not authenticate, send email, or store credentials. The dashboard starts at `/dashboard`; its child routes are `/changes`, `/changes/:id`, `/integration`, `/evidence`, `/activity`, `/settings`, and `/onboarding`.
+The homepage lives at `/`. `/auth` uses GitHub social authentication. `/dashboard` and its integration, changes, evidence, activity, and settings routes require a valid server session and read/write PostgreSQL through the API.
 
-The web host must serve `index.html` for application routes. Vite provides this fallback during development and preview.
+`/demo` retains the synthetic example workspace, including the existing change-detail and onboarding screens. Its actions remain local to the browser and never mutate a real installation.
 
-## Interface scope
+The web host must serve `index.html` for application routes and proxy `/api/*` to the backend. Vite handles both during development. Use `http://localhost:5173` consistently with the configured OAuth callback.
 
-The dashboard is a frontend demo. All provider changes, repositories, versions, source records, and verification results are synthetic. Actions persist under `rebnd-dashboard-demo-v1` in browser local storage. Settings includes a confirmed reset action.
+## Implementation scope
 
-Monitoring and execution pause independently. Target approval is explicit, missing evidence blocks verification, ignored changes can be restored, and inventory or check-command edits invalidate evidence. The current revision must be approved before a new example verification can be produced.
+The control plane implements tenant-scoped installation management, immutable workflow revisions, exact-hash approval, candidate review, run requests/cancellation, evidence reads, audit history, and persistent GitHub sessions. Mutations enforce revisions and idempotency keys. Shared contracts live under `packages/shared`.
 
-No GitHub connection, provider polling, code execution, PR publication, authentication, or backend service is implemented. A production implementation must enforce every permission and evidence gate server-side.
+Repository scanning needs a separate selected-repository GitHub App. Provider adapters, source monitoring, isolated execution, artifact storage, retention deletion, and trusted PR publishing remain capability blockers. The API never converts missing infrastructure into verified evidence or a fake PR. See [API contracts and setup](apps/api/README.md) for endpoints, configuration, and explicit limitations.
 
 ## Visual system
 

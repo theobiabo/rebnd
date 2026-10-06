@@ -14,9 +14,9 @@ export function DashboardPage() {
   const model = useDashboardModel()
   const path = window.location.pathname.replace(/\/$/, "")
   const content =
-    path === "/dashboard" ? (
+    path === "/demo" ? (
       <OverviewPage model={model} />
-    ) : path === "/dashboard/changes" ? (
+    ) : path === "/demo/changes" ? (
       <>
         <PageHeading
           eyebrow="Change inbox / approved sources"
@@ -25,20 +25,20 @@ export function DashboardPage() {
         />
         <ChangesTable changes={model.state.changes} />
       </>
-    ) : path.startsWith("/dashboard/changes/") ? (
+    ) : path.startsWith("/demo/changes/") ? (
       <ChangeDetailPage
         id={decodeURIComponent(path.split("/").pop() ?? "")}
         model={model}
       />
-    ) : path === "/dashboard/evidence" ? (
+    ) : path === "/demo/evidence" ? (
       <EvidencePage model={model} />
-    ) : path === "/dashboard/integration" ? (
+    ) : path === "/demo/integration" ? (
       <IntegrationPage model={model} />
-    ) : path === "/dashboard/activity" ? (
+    ) : path === "/demo/activity" ? (
       <ActivityPage model={model} />
-    ) : path === "/dashboard/settings" ? (
+    ) : path === "/demo/settings" ? (
       <SettingsPage model={model} />
-    ) : path === "/dashboard/onboarding" ? (
+    ) : path === "/demo/onboarding" ? (
       <OnboardingPage model={model} />
     ) : (
       <>
@@ -47,7 +47,7 @@ export function DashboardPage() {
           title="That page isn’t here."
           description="Return to your workspace to review the current integration."
         />
-        <a href="/dashboard" className="underline">
+        <a href="/demo" className="underline">
           Back to overview
         </a>
       </>

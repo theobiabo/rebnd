@@ -72,7 +72,7 @@ export function OnboardingPage({ model }: { model: DashboardModel }) {
                 This setup is illustrative. No GitHub permission was requested,
                 no repository was scanned, and no checks were executed.
               </p>
-              <Button render={<a href="/dashboard" />} className="h-10 px-4">
+              <Button render={<a href="/demo" />} className="h-10 px-4">
                 Open dashboard
                 <ArrowRight />
               </Button>

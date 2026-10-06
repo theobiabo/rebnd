@@ -16,11 +16,13 @@
     "./types/integration": "./src/types/integration.ts",
     "./examples/subscription": "./src/examples/subscription.ts",
     "./utils/download-json": "./src/utils/download-json.ts",
-    "./components/password-field": "./src/components/password-field.tsx"
+    "./components/password-field": "./src/components/password-field.tsx",
+    "./contracts/api": "./src/contracts/api.ts"
   },
   "dependencies": {
     "@workspace/ui": "workspace:*",
-    "lucide-react": "^1.52.0"
+    "lucide-react": "^1.52.0",
+    "zod": "^4.6.5"
   },
   "peerDependencies": {
     "react": "^19.2.8"
