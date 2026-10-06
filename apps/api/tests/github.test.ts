@@ -1,5 +1,10 @@
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest"
-import { createHmac, generateKeyPairSync } from "node:crypto"
+import {
+  createHash,
+  createHmac,
+  generateKeyPairSync,
+  randomBytes,
+} from "node:crypto"
 import { testDatabase, testEnvironment } from "./database"
 import { GithubClient } from "../src/modules/github/client"
 import { GithubService } from "../src/modules/github/service"
@@ -40,6 +45,9 @@ const repositories = [
     disabled: false,
   },
 ]
+const findInstallation = vi
+  .spyOn(client, "findPersonalInstallation")
+  .mockResolvedValue(null)
 const installation = vi
   .spyOn(client, "installation")
   .mockResolvedValue(remoteInstallation)
@@ -105,8 +113,14 @@ afterAll(async () => {
   await fixture?.close()
 })
 async function state(user = owner) {
-  return new URL((await github.start(user)).url).searchParams.get("state")!
+  const token = randomBytes(32).toString("base64url")
+  await fixture.db.query(
+    "INSERT INTO github_install_states(state_hash, owner_id, expires_at) VALUES($1, $2, now() + interval '15 minutes')",
+    [createHash("sha256").update(token).digest("hex"), user]
+  )
+  return token
 }
+
 async function send(path: string, body?: unknown, user = owner) {
   return app.request(`/api/v1${path}`, {
     method: body ? "POST" : "GET",
@@ -322,6 +336,18 @@ describe("GitHub repository authorization and notifications", () => {
     })
     expect((await github.connection(owner))?.status).toBe("revoked")
     expect(await github.repositories(owner)).toEqual([])
+  })
+  it("reconnects an existing installation only after checking the signed-in GitHub owner", async () => {
+    findInstallation.mockResolvedValueOnce(remoteInstallation)
+    expect(await github.start(owner)).toEqual({ url: "/dashboard/integration" })
+    expect((await github.connection(owner))?.status).toBe("active")
+    expect(await github.start(owner)).toEqual({
+      url: "https://github.com/settings/installations/77",
+    })
+    findInstallation.mockResolvedValueOnce(remoteInstallation)
+    await expect(github.start(other)).rejects.toMatchObject({
+      code: "INSTALLATION_OWNER_MISMATCH",
+    })
   })
   it("keeps notification enqueue idempotent", async () => {
     const result = await fixture.db.query<{

@@ -38,6 +38,18 @@ export class GithubService {
         "GITHUB_NOT_CONFIGURED",
         "The GitHub App is not configured yet."
       )
+    const linked = await this.connection(ownerId)
+    if (linked?.status === "active")
+      return {
+        url: `https://github.com/settings/installations/${linked.github_installation_id}`,
+      }
+    const identities = await this.db.query<{ accountId: string }>(
+      'SELECT "accountId" FROM account WHERE "userId" = $1 AND "providerId" = $2',
+      [ownerId, "github"]
+    )
+    const existing = identities.rows[0]
+      ? await this.client.findPersonalInstallation(identities.rows[0].accountId)
+      : null
     const state = randomBytes(32).toString("base64url")
     await this.db.transaction(async (tx) => {
       await tx.query(
@@ -49,6 +61,10 @@ export class GithubService {
         [hash(state), ownerId]
       )
     })
+    if (existing) {
+      await this.complete(ownerId, { state, installationId: existing.id })
+      return { url: "/dashboard/integration" }
+    }
     return {
       url: `${this.client.installUrl}?state=${encodeURIComponent(state)}`,
     }

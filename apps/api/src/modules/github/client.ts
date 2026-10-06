@@ -73,6 +73,25 @@ export class GithubClient {
       )
     return response.json() as Promise<T>
   }
+  async findPersonalInstallation(accountId: string) {
+    for (let page = 1; page <= 100; page++) {
+      const installations = await this.request<GithubInstallation[]>(
+        `/app/installations?per_page=100&page=${page}`,
+        this.jwt()
+      )
+      const match = installations.find(
+        (item) =>
+          item.account.type === "User" && String(item.account.id) === accountId
+      )
+      if (match) return match
+      if (installations.length < 100) return null
+    }
+    throw new ApiError(
+      503,
+      "GITHUB_INSTALLATION_LOOKUP_LIMIT",
+      "Could not locate the installation. Please try again later."
+    )
+  }
   installation(id: number) {
     return this.request<GithubInstallation>(
       `/app/installations/${id}`,
