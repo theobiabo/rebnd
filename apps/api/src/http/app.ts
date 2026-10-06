@@ -20,6 +20,8 @@ import {
   getDocument,
   listDocuments,
 } from "../modules/installations/repository"
+import type { GithubService } from "../modules/github/service"
+import { registerGithubRoutes } from "../modules/github/routes"
 import { ApiError } from "./errors"
 
 type Session = {
@@ -32,7 +34,12 @@ export type AuthGateway = {
   }
 }
 type AppEnv = { Variables: { ownerId: string; requestId: string } }
-export function createApp(db: Database, auth: AuthGateway, webOrigin: string) {
+export function createApp(
+  db: Database,
+  auth: AuthGateway,
+  webOrigin: string,
+  github?: GithubService
+) {
   const app = new Hono<AppEnv>()
   const service = new InstallationService(db)
   app.use("*", requestId())
@@ -48,6 +55,21 @@ export function createApp(db: Database, auth: AuthGateway, webOrigin: string) {
       maxAge: 600,
     })
   )
+  if (github) {
+    app.post(
+      "/api/webhooks/github",
+      bodyLimit({ maxSize: 1024 * 1024 }),
+      async (c) =>
+        c.json(
+          await github.webhook(
+            await c.req.text(),
+            c.req.header("X-Hub-Signature-256") ?? "",
+            c.req.header("X-GitHub-Delivery") ?? "",
+            c.req.header("X-GitHub-Event") ?? ""
+          )
+        )
+    )
+  }
   app.use(
     "/api/*",
     bodyLimit({
@@ -74,7 +96,7 @@ export function createApp(db: Database, auth: AuthGateway, webOrigin: string) {
       return c.json({ status: "unavailable" }, 503)
     }
   })
-  app.on(["GET", "POST"], "/api/auth/*", (c) => auth.handler(c.req.raw))
+  app.all("/api/auth/*", (c) => auth.handler(c.req.raw))
   app.use("/api/v1/*", async (c, next) => {
     if (!["GET", "HEAD", "OPTIONS"].includes(c.req.method)) {
       if (c.req.header("Origin") !== webOrigin)
@@ -117,6 +139,7 @@ export function createApp(db: Database, auth: AuthGateway, webOrigin: string) {
     }
     await next()
   })
+  if (github) registerGithubRoutes(app, db, github)
   app.get("/api/v1/installations", async (c) => {
     const { limit, offset } = pageQuerySchema.parse(c.req.query())
     const result = await db.query<{ document: Installation }>(
@@ -171,6 +194,17 @@ export function createApp(db: Database, auth: AuthGateway, webOrigin: string) {
           "INVALID_JSON",
           "The request body is not valid JSON."
         )
+      }
+      if (github && command === "create") {
+        const repository = await github.verifyRepository(
+          c.get("ownerId"),
+          z.object({ repository: z.string() }).parse(input).repository
+        )
+        input = {
+          ...z.record(z.string(), z.unknown()).parse(input),
+          repository: repository.full_name,
+          defaultBranch: repository.default_branch,
+        }
       }
       const result = await service.execute(
         c.get("ownerId"),

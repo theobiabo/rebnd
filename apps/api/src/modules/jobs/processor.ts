@@ -1,3 +1,4 @@
+import { enqueueNotification } from "../github/notifications"
 import type { Database } from "../../db/database"
 import { audit, getDocument, saveDocument } from "../installations/repository"
 
@@ -55,6 +56,11 @@ export async function processNextJob(db: Database): Promise<boolean> {
       )
       return
     }
+    const github = await connection.query(
+      "SELECT owner_id FROM github_connections WHERE owner_id = $1 AND status = 'active'",
+      [job.owner_id]
+    )
+    const connected = github.rows.length > 0
     const cancelled =
       installation.state === "revoked" ||
       (run.kind === "scan"
@@ -75,7 +81,9 @@ export async function processNextJob(db: Database): Promise<boolean> {
         : exhausted
           ? "RETRY_EXHAUSTED"
           : run.kind === "scan"
-            ? "GITHUB_APP_REQUIRED"
+            ? connected
+              ? "SCANNER_ADAPTER_REQUIRED"
+              : "GITHUB_APP_REQUIRED"
             : "PROVIDER_ADAPTER_REQUIRED"
     run.reason = cancelled
       ? "The installation policy changed before the job started."
@@ -84,10 +92,13 @@ export async function processNextJob(db: Database): Promise<boolean> {
         : exhausted
           ? "The infrastructure retry budget was exhausted."
           : run.kind === "scan"
-            ? "Connect a selected-repository GitHub App before scanning. GitHub sign-in grants identity access only."
+            ? connected
+              ? "GitHub is connected. Configure a provider-specific scanner before analysis. No compatibility check was performed."
+              : "Connect a selected-repository GitHub App before scanning. GitHub sign-in grants identity access only."
             : "Select the provider and target evidence source, and configure an isolated runner before verification. No code was executed."
     run.finishedAt = new Date().toISOString()
     await saveDocument(connection, "runs", job.owner_id, run)
+    await enqueueNotification(connection, job.owner_id, installation.id, run)
     installation.revision += 1
     installation.updatedAt = run.finishedAt
     await saveDocument(connection, "installations", job.owner_id, installation)

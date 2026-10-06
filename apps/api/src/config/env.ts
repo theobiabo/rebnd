@@ -29,7 +29,30 @@ const schema = z
       ),
     WEB_ORIGIN: origin.default("http://localhost:5173"),
     BETTER_AUTH_URL: origin.default("http://localhost:5173"),
+    BETTER_AUTH_API_KEY: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(1).optional()
+    ),
     BETTER_AUTH_SECRET: z.string().min(32),
+    GITHUB_APP_ID: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().regex(/^\d+$/).optional()
+    ),
+    GITHUB_APP_SLUG: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z
+        .string()
+        .regex(/^[a-z0-9-]+$/)
+        .optional()
+    ),
+    GITHUB_APP_PRIVATE_KEY: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(1).optional()
+    ),
+    GITHUB_APP_WEBHOOK_SECRET: z.preprocess(
+      (value) => (value === "" ? undefined : value),
+      z.string().min(32).optional()
+    ),
     GITHUB_CLIENT_ID: z.string().min(1),
     GITHUB_CLIENT_SECRET: z.string().min(1),
   })

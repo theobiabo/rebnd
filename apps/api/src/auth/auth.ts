@@ -1,3 +1,4 @@
+import { dash } from "@better-auth/infra"
 import { betterAuth, type BetterAuthOptions } from "better-auth"
 import type { Pool } from "pg"
 import type { Environment } from "../config/env"
@@ -8,6 +9,14 @@ export function authOptions(database: Pool, env: Environment) {
     baseURL: env.BETTER_AUTH_URL,
     secret: env.BETTER_AUTH_SECRET,
     database,
+    plugins: env.BETTER_AUTH_API_KEY
+      ? [
+          dash({
+            apiKey: env.BETTER_AUTH_API_KEY,
+            activityTracking: { enabled: false },
+          }),
+        ]
+      : [],
     trustedOrigins: [env.WEB_ORIGIN],
     emailAndPassword: { enabled: false },
     socialProviders: {

@@ -4,12 +4,17 @@ import { readEnvironment } from "./config/env"
 import { createDatabase, createPool } from "./db/database"
 import { createApp } from "./http/app"
 
+import { GithubClient } from "./modules/github/client"
+import { GithubService } from "./modules/github/service"
+
 const env = readEnvironment()
 const pool = createPool(env.DATABASE_URL)
+const db = createDatabase(pool)
 const app = createApp(
-  createDatabase(pool),
+  db,
   createAuth(pool, env),
-  env.WEB_ORIGIN
+  env.WEB_ORIGIN,
+  new GithubService(db, new GithubClient(env), env.GITHUB_APP_WEBHOOK_SECRET)
 )
 const server = serve({ fetch: app.fetch, port: env.PORT }, ({ port }) =>
   console.info(`rebnd API listening on port ${port}`)

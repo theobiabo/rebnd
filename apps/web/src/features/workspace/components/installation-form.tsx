@@ -4,7 +4,15 @@ import type { WorkspaceModel } from "../hooks/use-workspace"
 
 export const fieldClass =
   "mt-2 h-11 w-full border border-border bg-background px-3 text-sm outline-none focus:border-foreground"
-export function InstallationForm({ model }: { model: WorkspaceModel }) {
+import type { GithubModel } from "../hooks/use-github"
+
+export function InstallationForm({
+  model,
+  github,
+}: {
+  model: WorkspaceModel
+  github: GithubModel
+}) {
   const [name, setName] = useState("")
   const [repository, setRepository] = useState("")
   async function submit(event: FormEvent) {
@@ -12,7 +20,9 @@ export function InstallationForm({ model }: { model: WorkspaceModel }) {
     await model.execute("/installations", {
       name,
       repository,
-      defaultBranch: "main",
+      defaultBranch:
+        github.repositories.find((item) => item.name === repository)
+          ?.defaultBranch ?? "main",
     })
   }
   return (
@@ -40,20 +50,25 @@ export function InstallationForm({ model }: { model: WorkspaceModel }) {
       </label>
       <label className="block text-xs">
         GitHub repository
-        <input
+        <select
           required
-          pattern="[a-zA-Z0-9_.-]+/[a-zA-Z0-9_.-]+"
           value={repository}
           onChange={(event) => setRepository(event.target.value)}
-          placeholder="owner/repository"
           className={fieldClass}
-        />
+          disabled={github.busy || !github.repositories.length}
+        >
+          <option value="">Select a connected repository</option>
+          {github.repositories.map((repo) => (
+            <option key={repo.id} value={repo.name}>
+              {repo.name}
+            </option>
+          ))}
+        </select>
       </label>
       <p className="text-xs leading-6 text-muted-foreground">
-        Selecting a repository does not grant access. A separate GitHub App
-        connection is required for scanning.
+        Only repositories granted to your GitHub App installation are available.
       </p>
-      <Button disabled={model.busy} type="submit">
+      <Button disabled={model.busy || github.busy || !repository} type="submit">
         {model.busy ? "Creating…" : "Create installation"}
       </Button>
     </form>

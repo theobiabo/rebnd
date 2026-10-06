@@ -1,6 +1,9 @@
 import { useEffect } from "react"
 import { Button } from "@workspace/ui/components/button"
 import { PageHeading } from "@workspace/shared/components/page-heading"
+import { useGithub } from "./hooks/use-github"
+import { GithubConnection } from "./components/github-connection"
+import { GithubNotifications } from "./components/github-notifications"
 import { useWorkspace } from "./hooks/use-workspace"
 import { WorkspaceShell } from "./components/workspace-shell"
 import { InstallationForm } from "./components/installation-form"
@@ -42,6 +45,7 @@ const headings: Record<string, [string, string]> = {
 }
 export function WorkspacePage() {
   const model = useWorkspace()
+  const github = useGithub()
   const section =
     window.location.pathname.replace(/\/$/, "").split("/")[2] ?? "overview"
   const heading = headings[section] ?? [
@@ -53,7 +57,7 @@ export function WorkspacePage() {
     document.title = `${title} — rebnd`
   }, [title])
   const content = !model.data ? (
-    <InstallationForm model={model} />
+    <InstallationForm model={model} github={github} />
   ) : section === "overview" ? (
     <OverviewPanel model={model} />
   ) : section === "integration" || section === "onboarding" ? (
@@ -106,6 +110,15 @@ export function WorkspacePage() {
         >
           {model.notice}
         </p>
+      )}
+      {(!model.data || section === "integration" || section === "settings") && (
+        <GithubConnection model={github} />
+      )}
+      {model.data && (section === "integration" || section === "settings") && (
+        <GithubNotifications
+          installationId={model.data.installation.id}
+          repository={model.data.installation.repository}
+        />
       )}
       {model.loading ? (
         <p className="text-sm text-muted-foreground">Loading your workspace…</p>

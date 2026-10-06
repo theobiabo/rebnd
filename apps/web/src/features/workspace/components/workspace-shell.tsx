@@ -4,7 +4,6 @@ import {
   Boxes,
   FlaskConical,
   LayoutDashboard,
-  LogOut,
   Menu,
   Radio,
   Settings2,
@@ -13,6 +12,7 @@ import {
 import { Brand } from "@workspace/shared/components/brand"
 import { Button } from "@workspace/ui/components/button"
 import { cn } from "@workspace/ui/lib/utils"
+import { SignOutDialog } from "@/features/auth/components/sign-out-dialog"
 import { authClient } from "@/lib/auth-client"
 
 const navigation = [
@@ -34,20 +34,7 @@ export function WorkspaceShell({
 }) {
   const { data } = authClient.useSession()
   const [open, setOpen] = useState(false)
-  const [signingOut, setSigningOut] = useState(false)
-  const [error, setError] = useState("")
   const current = window.location.pathname.replace(/\/$/, "")
-  async function signOut() {
-    setSigningOut(true)
-    try {
-      const result = await authClient.signOut()
-      if (result.error) throw new Error("Sign-out failed. Please try again.")
-      window.location.assign("/auth")
-    } catch {
-      setError("Sign-out failed. Please try again.")
-      setSigningOut(false)
-    }
-  }
   return (
     <div className="dashboard-theme dashboard-canvas min-h-dvh bg-background text-foreground">
       <a
@@ -108,20 +95,7 @@ export function WorkspaceShell({
           <p className="mt-1 truncate text-[10px] text-muted-foreground">
             {data?.user.email}
           </p>
-          <Button
-            className="mt-4 w-full justify-start"
-            variant="outline"
-            disabled={signingOut}
-            onClick={() => void signOut()}
-          >
-            <LogOut className="size-3" />
-            {signingOut ? "Signing out…" : "Sign out"}
-          </Button>
-          {error && (
-            <p role="alert" className="mt-3 text-xs">
-              {error}
-            </p>
-          )}
+          <SignOutDialog />
         </div>
       </aside>
       <div className="lg:pl-56">

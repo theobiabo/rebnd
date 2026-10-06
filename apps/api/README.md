@@ -38,6 +38,16 @@ OAuth state and callback checks are enabled, tokens are encrypted at rest using 
 
 The frontend uses the same origin. Every control-plane mutation requires that exact `Origin`, JSON, `Idempotency-Key`, and `expectedRevision`. No user ID or owner ID supplied in a request body is trusted. Every resource query is scoped to the authenticated owner. Cross-owner resource IDs return 404.
 
+## Optional Better Auth dashboard
+
+Installations can connect to Better Auth Infrastructure using the included `dash()` server plugin and `dashClient()` client plugin. Set the server-only `BETTER_AUTH_API_KEY` to enable the connection; leave it blank to keep the cloud integration disabled. Do not prefix it with `VITE_` or commit it. Activity tracking is disabled by default.
+
+Register the running server with base path `/api/auth` in the Better Auth dashboard. Localhost requires a temporary HTTPS tunnel; production should use the stable HTTPS application origin. Keep GitHub's callback set to the browser-facing app origin, independently of the dashboard's server connection URL. The local callback remains `http://localhost:5173/api/auth/callback/github`.
+
+Connecting grants the Better Auth dashboard administrative access to auth users and sessions and enables authentication event reporting. Plugin endpoints require signed dashboard authorization; ordinary application sessions do not grant dashboard administrator access. Hono forwards all auth HTTP methods to Better Auth so dashboard operations reach the plugin's own authorization checks.
+
+A temporary tunnel is a development connection and stops working when the tunnel or local API is stopped. No tunnel is launched automatically by this repository. GitHub login still uses `http://localhost:5173`; the tunnel URL is only the dashboard connection address. The configured cloud project is [Rebnd](https://dash.better-auth.com/rebnd) on the free Starter plan, and its development OAuth application is owned by `theobiabo`. Production setup requires a stable HTTPS origin and a separately registered production callback.
+
 ## API contract
 
 All paths below are prefixed with `/api/v1`. Request and response types live in `packages/shared/src/contracts/api.ts`.
@@ -114,3 +124,17 @@ Tests run PostgreSQL SQL through an isolated PGlite database without external cr
 Better Auth schema migrations use the installed library's migration API. Application SQL migrations are ordered, transactional, and recorded with checksums. Do not edit an already-applied SQL migration; add the next numbered file.
 
 References: [Better Auth GitHub setup](https://better-auth.com/docs/authentication/github), [Hono integration](https://better-auth.com/docs/integrations/hono), [GitHub OAuth scopes](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/scopes-for-oauth-apps).
+
+### GitHub App repository connections
+
+GitHub sign-in remains a separate OAuth app. Register a private development GitHub App with homepage `http://localhost:5173` and setup URL `http://localhost:5173/dashboard/integration`. Enable redirect on update. Do not enable OAuth during installation. Keep SSL verification enabled. Grant Contents: read, Issues: read/write, and the mandatory Metadata: read permission. Installation and installation-repositories events are automatically delivered by GitHub; no additional event subscriptions are needed.
+
+Set the webhook URL to a stable HTTPS endpoint ending in `/api/webhooks/github`. Configure a random webhook secret of at least 32 characters. Put `GITHUB_APP_ID`, `GITHUB_APP_SLUG`, `GITHUB_APP_PRIVATE_KEY`, and `GITHUB_APP_WEBHOOK_SECRET` in the server environment. Store the PEM as a quoted value with literal `\n` escapes; the client restores the newlines. Never use `VITE_` variables for these values or commit private keys. Run database migrations and restart both API and worker after changing environment variables.
+
+From Integration, select Connect GitHub. Install on the personal account used for sign-in, choosing Only select repositories. The pilot deliberately rejects organization installations and all-repository access. A short-lived, single-use state is bound to the signed-in owner, and the server checks the installation account against the linked GitHub account ID. Repository selection comes from live GitHub installation access, not arbitrary names entered in the browser.
+
+For notifications, supply an existing open issue or PR number in the integration’s repository and enable comments. Future worker run outcomes enter a durable outbox in the same transaction as the run status. The notification worker obtains a short-lived token restricted to that repository, checks current access, and posts a status comment. It retries failures with backoff up to five times and reconciles comments by a unique marker after ambiguous network failures. Disabling notifications cancels pending delivery. An already in-flight GitHub request may finish. Delivery status is shown in Integration and Settings. GitHub decides who receives email or inbox notifications according to subscriptions and user preferences.
+
+Signed installation deletion/suspension webhooks revoke the connection and cancel pending notifications. Repository access is checked live before each delivery, including when a webhook is missed. Removed repositories become unavailable. Reconnect explicitly after restoring an installation. Existing manually scoped workspaces can use notifications only after the matching repository is granted to the App.
+
+This connects repository access and run-status notifications. Provider-specific scanning, isolated verification, automatic issue creation and PR publishing are still separate adapters; a connection alone never marks a run as verified. Production needs a stable public webhook host and managed secrets; a temporary development tunnel is not a deployment.

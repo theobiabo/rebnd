@@ -1,5 +1,5 @@
 import { PGlite } from "@electric-sql/pglite"
-import { readFile } from "node:fs/promises"
+import { readFile, readdir } from "node:fs/promises"
 import type { Pool } from "pg"
 import { getMigrations } from "better-auth/db/migration"
 import { createAuth, authOptions } from "../src/auth/auth"
@@ -16,7 +16,8 @@ export const testEnvironment: Environment = {
   GITHUB_CLIENT_ID: "test-client-id",
   GITHUB_CLIENT_SECRET: "test-client-secret",
 }
-export async function testDatabase() {
+export async function testDatabase(overrides: Partial<Environment> = {}) {
+  const environment = { ...testEnvironment, ...overrides }
   const pg = new PGlite()
   const client = {
     async query(sql: string, values?: unknown[]) {
@@ -30,16 +31,14 @@ export async function testDatabase() {
     connect: async () => client,
     end: async () => {},
   } as unknown as Pool
-  await (
-    await getMigrations(authOptions(pool, testEnvironment))
-  ).runMigrations()
-  const auth = createAuth(pool, testEnvironment)
-  await pg.exec(
-    await readFile(
-      new URL("../src/db/migrations/001_control_plane.sql", import.meta.url),
-      "utf8"
-    )
-  )
+  await (await getMigrations(authOptions(pool, environment))).runMigrations()
+  const auth = createAuth(pool, environment)
+  const directory = new URL("../src/db/migrations/", import.meta.url)
+  for (const name of (await readdir(directory))
+    .filter((name) => name.endsWith(".sql"))
+    .sort()) {
+    await pg.exec(await readFile(new URL(name, directory), "utf8"))
+  }
   const execute: SqlExecutor["query"] = async (sql, values) =>
     pg.query(sql, values)
   const db: Database = {

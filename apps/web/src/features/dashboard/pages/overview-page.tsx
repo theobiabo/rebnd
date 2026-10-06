@@ -202,11 +202,7 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
                 : "Your review queue is clear. Inspect the evidence before taking the next step."}
             </p>
             <a
-              href={
-                needsReview
-                  ? "/demo/changes/CHG-025"
-                  : "/demo/evidence"
-              }
+              href={needsReview ? "/demo/changes/CHG-025" : "/demo/evidence"}
               className="mt-5 inline-flex items-center gap-3 self-start border-b border-foreground pb-1 text-xs font-medium"
             >
               {needsReview ? "Review target change" : "Inspect evidence"}
@@ -234,10 +230,7 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
             <h2 className="font-heading text-lg font-medium">
               The paper trail
             </h2>
-            <a
-              href="/demo/activity"
-              aria-label="View full activity history"
-            >
+            <a href="/demo/activity" aria-label="View full activity history">
               <ArrowUpRight className="size-4" />
             </a>
           </div>

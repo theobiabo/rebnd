@@ -17,7 +17,8 @@
     "./examples/subscription": "./src/examples/subscription.ts",
     "./utils/download-json": "./src/utils/download-json.ts",
     "./components/password-field": "./src/components/password-field.tsx",
-    "./contracts/api": "./src/contracts/api.ts"
+    "./contracts/api": "./src/contracts/api.ts",
+    "./contracts/github": "./src/contracts/github.ts"
   },
   "dependencies": {
     "@workspace/ui": "workspace:*",

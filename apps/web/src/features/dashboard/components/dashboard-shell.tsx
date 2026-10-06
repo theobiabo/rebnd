@@ -40,9 +40,7 @@ export function DashboardShell({
   const path = window.location.pathname.replace(/\/$/, "")
   const current =
     navigation.find((item) =>
-      item.path === "/demo"
-        ? path === item.path
-        : path.startsWith(item.path)
+      item.path === "/demo" ? path === item.path : path.startsWith(item.path)
     )?.label ?? (path.includes("onboarding") ? "Setup" : "Settings")
   useEffect(() => {
     document.title = `${current} — rebnd`
