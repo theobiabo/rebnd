@@ -32,7 +32,7 @@ export function ChangesTable({
         </div>
         {compact ? (
           <a
-            href="/dashboard/changes"
+            href="/demo/changes"
             className="flex items-center gap-2 text-[11px] hover:underline"
           >
             All changes
@@ -92,7 +92,7 @@ export function ChangesTable({
               >
                 <td className="px-5 py-4">
                   <a
-                    href={`/dashboard/changes/${change.id}`}
+                    href={`/demo/changes/${change.id}`}
                     className="block text-xs leading-5 font-medium group-hover:underline"
                   >
                     {change.title}
@@ -111,7 +111,7 @@ export function ChangesTable({
                 </td>
                 <td className="pr-4">
                   <a
-                    href={`/dashboard/changes/${change.id}`}
+                    href={`/demo/changes/${change.id}`}
                     aria-label={`Review ${change.id}`}
                   >
                     <ArrowUpRight className="size-4" />

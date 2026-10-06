@@ -16,7 +16,7 @@ export function IntegrationPage({ model }: { model: DashboardModel }) {
         description="A versioned inventory for one deliberately bounded workflow."
         action={
           <Button
-            render={<a href="/dashboard/onboarding" />}
+            render={<a href="/demo/onboarding" />}
             variant="outline"
             className="h-10 px-4 text-xs"
           >

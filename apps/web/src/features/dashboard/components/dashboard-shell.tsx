@@ -22,11 +22,11 @@ import { Brand } from "@workspace/shared/components/brand"
 import type { DashboardModel } from "../hooks/use-dashboard-model"
 
 const navigation = [
-  { label: "Overview", path: "/dashboard", icon: LayoutDashboard },
-  { label: "Changes", path: "/dashboard/changes", icon: Radio },
-  { label: "Integration", path: "/dashboard/integration", icon: Boxes },
-  { label: "Evidence", path: "/dashboard/evidence", icon: FlaskConical },
-  { label: "Activity", path: "/dashboard/activity", icon: Activity },
+  { label: "Overview", path: "/demo", icon: LayoutDashboard },
+  { label: "Changes", path: "/demo/changes", icon: Radio },
+  { label: "Integration", path: "/demo/integration", icon: Boxes },
+  { label: "Evidence", path: "/demo/evidence", icon: FlaskConical },
+  { label: "Activity", path: "/demo/activity", icon: Activity },
 ]
 
 export function DashboardShell({
@@ -40,7 +40,7 @@ export function DashboardShell({
   const path = window.location.pathname.replace(/\/$/, "")
   const current =
     navigation.find((item) =>
-      item.path === "/dashboard"
+      item.path === "/demo"
         ? path === item.path
         : path.startsWith(item.path)
     )?.label ?? (path.includes("onboarding") ? "Setup" : "Settings")
@@ -92,7 +92,7 @@ export function DashboardShell({
         <nav aria-label="Dashboard navigation" className="space-y-1 px-3">
           {navigation.map(({ label, path: href, icon: Icon }) => {
             const active =
-              href === "/dashboard" ? path === href : path.startsWith(href)
+              href === "/demo" ? path === href : path.startsWith(href)
             return (
               <a
                 key={href}
@@ -133,7 +133,7 @@ export function DashboardShell({
               Your team decides what ships.
             </p>
             <a
-              href="/dashboard/onboarding"
+              href="/demo/onboarding"
               className="mt-3 flex items-center justify-between text-[10px] text-primary"
             >
               Review setup
@@ -141,7 +141,7 @@ export function DashboardShell({
             </a>
           </div>
           <a
-            href="/dashboard/settings"
+            href="/demo/settings"
             className={cn(
               "mb-1 flex items-center gap-3 p-3 text-xs",
               current === "Settings"

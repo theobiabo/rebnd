@@ -16,3 +16,5 @@ Reusable rebnd application components, providers, types, examples, and browser u
 Keep route navigation, feature state, and application-specific business rules in the consuming app. Use `@workspace/ui` for shadcn primitives. This package must not import from `apps/` or depend on app aliases.
 
 React is a peer dependency. Source is consumed directly by the app bundler; there is no separate compiled distribution. Run `bun run lint` and `bun run typecheck` in this package, or run the same commands from the repository root to verify all workspaces.
+
+`contracts/api` exports Zod request schemas and typed installation, workflow, run, evidence, and audit responses for the API and web apps. These exports contain no React dependencies or server credentials.

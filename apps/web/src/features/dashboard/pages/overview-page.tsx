@@ -178,7 +178,7 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
             </dl>
           </div>
           <a
-            href="/dashboard/integration"
+            href="/demo/integration"
             className="flex items-center justify-between border-t-2 bg-background px-5 py-3 text-xs hover:bg-primary/25"
           >
             Inspect integration
@@ -204,8 +204,8 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
             <a
               href={
                 needsReview
-                  ? "/dashboard/changes/CHG-025"
-                  : "/dashboard/evidence"
+                  ? "/demo/changes/CHG-025"
+                  : "/demo/evidence"
               }
               className="mt-5 inline-flex items-center gap-3 self-start border-b border-foreground pb-1 text-xs font-medium"
             >
@@ -235,7 +235,7 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
               The paper trail
             </h2>
             <a
-              href="/dashboard/activity"
+              href="/demo/activity"
               aria-label="View full activity history"
             >
               <ArrowUpRight className="size-4" />
@@ -291,7 +291,7 @@ export function OverviewPage({ model }: { model: DashboardModel }) {
               </div>
             ))}
             <a
-              href="/dashboard/settings"
+              href="/demo/settings"
               className="flex items-center justify-between py-4 text-[11px]"
             >
               Limits & permissions
